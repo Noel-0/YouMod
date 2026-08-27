@@ -333,12 +333,15 @@ static NSMutableArray <YTIItemSectionRenderer *> *filteredArray(NSArray <YTIItem
 - (void)didMoveToWindow {
     %orig;
     NSString *iden = self.accessibilityIdentifier;
-    if ([iden isEqualToString:@"eml.expandable_metadata.vpp"]) [self removeFromSuperview];
-    if (IS_ENABLED(HideCommentsPreview) && [iden isEqualToString:@"id.ui.comments_entry_point_teaser"]) [self removeFromSuperview];
-    if ([self.accessibilityLabel containsString:@"Premium"] && [self._viewControllerForAncestor isKindOfClass:%c(YTPageHeaderViewController)]) {
+    if ([iden isEqualToString:@"eml.expandable_metadata.vpp"]) {
+        [self removeFromSuperview];  
+    } else if (IS_ENABLED(HideCommentsPreview) && [iden isEqualToString:@"id.ui.comments_entry_point_teaser"]) {
+        [self removeFromSuperview];
+    } else if ([self.accessibilityLabel containsString:@"Premium"] && [self._viewControllerForAncestor isKindOfClass:%c(YTPageHeaderViewController)]) {
         [self removeFromSuperview];
     }
     // Filter new ads in newer YT versions
+    /* TEMP-DISABLED
     if ([iden containsString:@"eml.ad_layout."]) {
         _ASCollectionViewCell *mainView = (_ASCollectionViewCell *)self.superview;
         while (mainView != nil && ![mainView isKindOfClass:%c(_ASCollectionViewCell)]) {
@@ -350,6 +353,7 @@ static NSMutableArray <YTIItemSectionRenderer *> *filteredArray(NSArray <YTIItem
         }
         // [mainView removeFromSuperview]; Sometimes running this crashes the app.
     }
+    */
 }
 %end
 

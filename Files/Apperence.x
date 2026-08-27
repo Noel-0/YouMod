@@ -144,6 +144,16 @@
 }
 %end
 
+%hook YTRiveStartupAnimationViewController
+- (void)viewDidAppear:(BOOL)animated {
+    %orig;
+    UIView *mainView = self.view;
+    mainView.backgroundColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull traitCollection) {
+        return isDarkMode(mainView) ? [UIColor blackColor] : [UIColor whiteColor];
+    }];
+}
+%end
+
 %hook YTStartupAnimationViewController
 - (void)viewDidAppear:(BOOL)animated {
     %orig;

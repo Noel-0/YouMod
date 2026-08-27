@@ -68,9 +68,12 @@
 #import <YouTubeHeader/YTIThumbnailDetails_Thumbnail.h>
 #import <YouTubeHeader/_ASCollectionViewCell.h>
 #import <YouTubeHeader/YTReelElementAsyncComponentView.h>
+#import <YouTubeHeader/YTIPlayerBarDecorationModel.h>
+#import <YouTubeHeader/YTPlayerBarProgressDecorationView.h>
+#import <YouTubeHeader/YTPlayerBarRectangleDecorationView.h>
 
 // For Settings.x and SponsorBlockSettings.x
-#import <roothide.h>
+#import <PSHeader/Misc.h>
 #import <YouTubeHeader/YTSettingsGroupData.h>
 #import <YouTubeHeader/YTSettingsSectionItem.h>
 #import <YouTubeHeader/YTSettingsSectionItemManager.h>
@@ -658,6 +661,9 @@ typedef NS_ENUM(NSUInteger, GestureSection) {
 @interface YTReelTopBarView : UIView
 @end
 
+@interface YTRiveStartupAnimationViewController : UIViewController
+@end
+
 // SponsorBlock action modes
 typedef NS_ENUM(NSInteger, SBSegmentAction) {
     SBSegmentActionDisable = 0,
@@ -666,6 +672,23 @@ typedef NS_ENUM(NSInteger, SBSegmentAction) {
     SBSegmentActionDisplay = 3,
     SBSegmentActionSkipTo = 4
 };
+
+@interface YTIPlayerBarItemData : GPBMessage
+- (CGFloat)startTimeSec;
+- (CGFloat)endTimeSec;
+@end
+
+@interface YTIPlayerBarDecorationModel (YouMod)
+- (YTIPlayerBarItemData *)itemData;
+@end
+
+@interface YTPlayerBarProgressDecorationView (YouMod)
+- (void)sb_updateSegmentMarkers;
+@end
+
+@interface YTPlayerBarRectangleDecorationView (YouMod)
+- (void)sb_updateSegmentMarkers;
+@end
 
 @interface SBSegment : NSObject
 @property (nonatomic, strong) NSString *UUID;
@@ -691,17 +714,20 @@ typedef NS_ENUM(NSInteger, SBSegmentAction) {
 @property (nonatomic, assign) NSTimeInterval remainingDuration;
 @property (nonatomic, assign) BOOL isPaused;
 @property (nonatomic, assign) BOOL isHighlightPill;
+@property (nonatomic, assign) BOOL isDismissing;
 @property (nonatomic, strong) NSDate *backgroundDate;
 + (instancetype)showInView:(UIView *)parentView message:(NSString *)message buttonTitle:(NSString *)buttonTitle action:(void (^)(void))action duration:(NSTimeInterval)duration;
 + (instancetype)showDownloadCompleteDialogInView:(UIView *)parentView message:(NSString *)message saveHandler:(void (^)(void))saveHandler shareHandler:(void (^)(void))shareHandler duration:(NSTimeInterval)duration;
 + (instancetype)showSuccessInView:(UIView *)parentView message:(NSString *)message duration:(NSTimeInterval)duration;
 + (instancetype)showErrorInView:(UIView *)parentView message:(NSString *)message duration:(NSTimeInterval)duration;
 - (void)dismiss;
+- (void)dismissWithCompletion:(void (^)(void))completion;
 - (void)pauseProgress;
 - (void)resumeProgress;
 @end
 
 extern UIView *sbGetNotificationParent(void);
+extern void sbDismissAllNotifications(void);
 extern void sbUpdateOverlayInsetForPivotBar(void);
 extern void YMPresentTabOrderModally(id parentResponder);
 
@@ -786,9 +812,11 @@ extern BOOL isPad();
 @property (nonatomic, strong) UIProgressView *progressBar;
 @property (nonatomic, strong) UIButton *cancelButton;
 @property (nonatomic, copy) void (^onCancel)(void);
+@property (nonatomic, assign) BOOL isDismissing;
 + (instancetype)showInView:(UIView *)parentView message:(NSString *)message cancelAction:(void (^)(void))cancelAction;
 - (void)updateProgress:(float)progress title:(NSString *)title subtitle:(NSString *)subtitle;
 - (void)dismiss;
+- (void)dismissWithCompletion:(void (^)(void))completion;
 @end
 
 @interface YTPlayerViewController (SponsorBlock)
