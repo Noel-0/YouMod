@@ -108,7 +108,7 @@ NSArray<YMOverlayButtonSpec *> *YMRegisteredOverlayButtons(void) {
 BOOL YMIsOverlayButtonEnabled(NSString *identifier) {
     if (!identifier || identifier.length == 0) return NO;
     if ([identifier isEqualToString:@"download.video"] && !IS_ENABLED(DownloadManager)) return NO;
-    if ([identifier isEqualToString:@"sponsorblock.toggle"] && !IS_ENABLED(SBEnabled)) return NO;
+    if ([identifier isEqualToString:@"sponsorblock.toggle"]) return IS_ENABLED(SBEnabled) && IS_ENABLED(SBShowButton);
     NSArray *savedOrder = [[NSUserDefaults standardUserDefaults] arrayForKey:OverlayButtonOrder];
     if (savedOrder.count > 0) {
         for (NSDictionary *entry in savedOrder) {
@@ -126,7 +126,6 @@ BOOL YMIsOverlayButtonEnabled(NSString *identifier) {
     if ([identifier isEqualToString:@"loop.video"]) return IS_ENABLED(LoopButton);
     if ([identifier isEqualToString:@"caption.video"]) return IS_ENABLED(CaptionButton);
     if ([identifier isEqualToString:@"download.video"]) return IS_ENABLED(DownloadManager);
-    if ([identifier isEqualToString:@"sponsorblock.toggle"]) return IS_ENABLED(SBEnabled) && IS_ENABLED(SBShowButton);
     return YES;
 }
 
@@ -144,7 +143,12 @@ NSArray<YMOverlayButtonSpec *> *YMOrderedOverlayButtons(void) {
     if (savedOrder.count > 0) {
         for (NSDictionary *entry in savedOrder) {
             NSString *ident = entry[@"id"];
-            BOOL enabled = [entry[@"enabled"] boolValue];
+            BOOL enabled;
+            if ([ident isEqualToString:@"sponsorblock.toggle"]) {
+                enabled = YMIsOverlayButtonEnabled(ident);
+            } else {
+                enabled = [entry[@"enabled"] boolValue];
+            }
             if (!enabled) continue;
             YMOverlayButtonSpec *spec = lookup[ident];
             if (spec) [ordered addObject:spec];
@@ -159,7 +163,9 @@ NSArray<YMOverlayButtonSpec *> *YMOrderedOverlayButtons(void) {
                 }
             }
             if (!found) {
-                [ordered addObject:spec];
+                if (YMIsOverlayButtonEnabled(spec.identifier)) {
+                    [ordered addObject:spec];
+                }
             }
         }
     } else {

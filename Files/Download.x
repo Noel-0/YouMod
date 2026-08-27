@@ -2034,7 +2034,7 @@ static void YouModShowTranslationDialog(NSString *text, UIViewController *presen
     
     UINavigationController *nav = [[UINavigationController alloc] initWithRootViewController:vc];
     
-    if (@available(iOS 15.0, *)) {
+    if ([nav respondsToSelector:@selector(sheetPresentationController)]) {
         UISheetPresentationController *sheet = nav.sheetPresentationController;
         if (sheet) {
             sheet.detents = @[ 

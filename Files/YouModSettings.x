@@ -1072,7 +1072,7 @@ static const void *kYMCachedDisplayedItemsKey = &kYMCachedDisplayedItemsKey;
         ? item.pickerOptions[currentValue]
         : item.pickerOptions[safeDefault];
 
-    if (@available(iOS 15.0, *)) {
+    if ([UIButtonConfiguration class] && [menuButton respondsToSelector:@selector(setConfiguration:)]) {
         UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
         config.title = currentTitle;
         config.image = [UIImage systemImageNamed:@"chevron.up.chevron.down" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:11 weight:UIImageSymbolWeightMedium]];
@@ -1992,6 +1992,9 @@ static const void *kYMOverlaySavedScrollEdgeAppearanceKey = &kYMOverlaySavedScro
         for (NSDictionary *entry in savedOrder) {
             NSString *buttonID = entry[@"id"];
             BOOL enabled = [entry[@"enabled"] boolValue];
+            if ([buttonID isEqualToString:@"sponsorblock.toggle"]) {
+                enabled = YMIsOverlayButtonEnabled(buttonID);
+            }
             if (buttonID) {
                 [data addObject:[@{@"id": buttonID, @"enabled": @(enabled)} mutableCopy]];
             }
@@ -2020,7 +2023,12 @@ static const void *kYMOverlaySavedScrollEdgeAppearanceKey = &kYMOverlaySavedScro
 - (void)saveButtonData {
     NSMutableArray *toSave = [NSMutableArray array];
     for (NSMutableDictionary *entry in self.buttonData) {
-        [toSave addObject:@{@"id": entry[@"id"], @"enabled": entry[@"enabled"]}];
+        NSString *buttonID = entry[@"id"];
+        BOOL enabled = [entry[@"enabled"] boolValue];
+        if ([buttonID isEqualToString:@"sponsorblock.toggle"]) {
+            enabled = YMIsOverlayButtonEnabled(buttonID);
+        }
+        [toSave addObject:@{@"id": buttonID, @"enabled": @(enabled)}];
     }
     [[NSUserDefaults standardUserDefaults] setObject:toSave forKey:OverlayButtonOrder];
     [[NSUserDefaults standardUserDefaults] synchronize];
@@ -2082,6 +2090,8 @@ static const void *kYMOverlaySavedScrollEdgeAppearanceKey = &kYMOverlaySavedScro
 
     if ([buttonID isEqualToString:@"download.video"]) {
         sw.hidden = !IS_ENABLED(DownloadManager);
+    } else if ([buttonID isEqualToString:@"sponsorblock.toggle"]) {
+        sw.hidden = YES;
     } else {
         sw.hidden = NO;
     }

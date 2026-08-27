@@ -427,6 +427,10 @@ static const void *kSBAllFlatRowsKey = &kSBAllFlatRowsKey;
     if (sender.tag < 0 || sender.tag >= (NSInteger)rows.count) return;
     NSString *key = rows[sender.tag].key;
     [[NSUserDefaults standardUserDefaults] setBool:sender.on forKey:key];
+    [[NSUserDefaults standardUserDefaults] synchronize];
+    if ([key isEqualToString:SBShowButton] || [key isEqualToString:SBEnabled]) {
+        [[NSNotificationCenter defaultCenter] postNotificationName:@"YouModUpdateOverlayButtons" object:nil];
+    }
 }
 
 #pragma mark - Slider Cells (Section 1)
@@ -551,7 +555,7 @@ static const void *kSBAllFlatRowsKey = &kSBAllFlatRowsKey;
     NSInteger currentAction = [[NSUserDefaults standardUserDefaults] integerForKey:actionKey];
     NSString *currentTitle = SBActionName(currentAction);
 
-    if (@available(iOS 15.0, *)) {
+    if ([UIButtonConfiguration class] && [menuButton respondsToSelector:@selector(setConfiguration:)]) {
         UIButtonConfiguration *config = [UIButtonConfiguration plainButtonConfiguration];
         config.title = currentTitle;
         config.image = [UIImage systemImageNamed:@"chevron.up.chevron.down" withConfiguration:[UIImageSymbolConfiguration configurationWithPointSize:11 weight:UIImageSymbolWeightMedium]];

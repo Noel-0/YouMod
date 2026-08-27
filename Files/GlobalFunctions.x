@@ -96,3 +96,10 @@ BOOL isDarkMode(UIView *view) {
 BOOL isPad() {
     return UIDevice.currentDevice.userInterfaceIdiom == UIUserInterfaceIdiomPad;
 }
+
+int ___isOSVersionAtLeast(int32_t major, int32_t minor, int32_t subminor) {
+    NSOperatingSystemVersion version = [[NSProcessInfo processInfo] operatingSystemVersion];
+    if (version.majorVersion != major) return version.majorVersion >= major;
+    if (version.minorVersion != minor) return version.minorVersion >= minor;
+    return version.patchVersion >= subminor;
+}
