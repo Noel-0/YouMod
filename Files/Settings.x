@@ -330,6 +330,7 @@ static NSString *GetCacheSize() { // YTLite - @dayanch96
             YMToggle(YMLOC(@"REMOVE_VIDEO_DISLIKE_BUTTON"), YMLOC(@"REMOVE_VIDEO_DISLIKE_BUTTON_DESC"), RemoveVideoDislikeButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_SHARE_BUTTON"), YMLOC(@"REMOVE_VIDEO_SHARE_BUTTON_DESC"), RemoveVideoShareButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_SAVE_BUTTON"), YMLOC(@"REMOVE_VIDEO_SAVE_BUTTON_DESC"), RemoveVideoSaveButton),
+            YMToggle(YMLOC(@"REMOVE_VIDEO_DOWNLOAD_BUTTON"), YMLOC(@"REMOVE_VIDEO_DOWNLOAD_BUTTON_DESC"), RemoveVideoDownloadButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_CLIP_BUTTON"), YMLOC(@"REMOVE_VIDEO_CLIP_BUTTON_DESC"), RemoveVideoClipButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_REMIX_BUTTON"), YMLOC(@"REMOVE_VIDEO_REMIX_BUTTON_DESC"), RemoveVideoRemixButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_LIVE_CHAT_BUTTON"), YMLOC(@"REMOVE_VIDEO_LIVE_CHAT_BUTTON_DESC"), RemoveVideoLiveChatButton),
