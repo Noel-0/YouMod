@@ -693,6 +693,9 @@ static YouModMediaFormat *YouModMediaFormatFromStream(YTIFormatStream *stream, B
             format.qualityLabel = audio.displayName;
             format.idp = audioidp;
             format.audioIsDefault = audio.audioIsDefault;
+        } else if (audio && audio.displayName.length > 0) {
+            format.qualityLabel = audio.displayName;
+            format.audioIsDefault = audio.audioIsDefault;
         }
     }
     format.contentLength = stream.contentLength;
@@ -708,44 +711,104 @@ static NSArray <YouModMediaFormat *> *YouModFormatsForPlayer(YTPlayerViewControl
         if (format) [formats addObject:format];
     }
 
-    [formats sortUsingComparator:^NSComparisonResult(YouModMediaFormat *left, YouModMediaFormat *right) {
-        if (video) {
+    if (formats.count == 0) return @[];
+
+    if (video) {
+        [formats sortUsingComparator:^NSComparisonResult(YouModMediaFormat *left, YouModMediaFormat *right) {
             NSInteger leftRes = left.resolution;
             NSInteger rightRes = right.resolution;
             if (leftRes != rightRes) return leftRes > rightRes ? NSOrderedAscending : NSOrderedDescending;
             NSInteger leftFPS = left.fps;
             NSInteger rightFPS = right.fps;
             if (leftFPS != rightFPS) return leftFPS > rightFPS ? NSOrderedAscending : NSOrderedDescending;
-        } else {
-            // Soundtracks are a list of languages, so order them the way a language list
-            // reads — the video's own track first, then by name. Falling through to the
-            // size comparison below would list them by file size, i.e. arbitrarily.
+
+            BOOL leftMP4 = YouModFormatLooksMP4Family(left);
+            BOOL rightMP4 = YouModFormatLooksMP4Family(right);
+            if (leftMP4 != rightMP4) return leftMP4 ? NSOrderedAscending : NSOrderedDescending;
+
+            if (left.contentLength != right.contentLength)
+                return left.contentLength > right.contentLength ? NSOrderedAscending : NSOrderedDescending;
+            return NSOrderedSame;
+        }];
+
+        NSMutableArray *unique = [NSMutableArray array];
+        NSMutableSet *seen = [NSMutableSet set];
+        for (YouModMediaFormat *format in formats) {
+            NSInteger fps = format.fps;
+            NSString *key = [NSString stringWithFormat:@"%@-%ld-%@", format.qualityLabel, (long)fps, YouModMimeDetail(format.mimeType)];
+            if ([seen containsObject:key]) continue;
+            [seen addObject:key];
+            [unique addObject:format];
+        }
+        return unique.copy;
+    } else {
+        BOOL hasExplicitTracks = NO;
+        for (YouModMediaFormat *format in formats) {
+            if (format.idp.length > 0 || format.qualityLabel.length > 0) {
+                hasExplicitTracks = YES;
+                break;
+            }
+        }
+
+        [formats sortUsingComparator:^NSComparisonResult(YouModMediaFormat *left, YouModMediaFormat *right) {
             if (left.audioIsDefault != right.audioIsDefault) return left.audioIsDefault ? NSOrderedAscending : NSOrderedDescending;
+
+            BOOL leftOrig = [left.idp hasSuffix:@".4"];
+            BOOL rightOrig = [right.idp hasSuffix:@".4"];
+            if (leftOrig != rightOrig) return leftOrig ? NSOrderedAscending : NSOrderedDescending;
+
+            BOOL leftHasIdp = left.idp.length > 0;
+            BOOL rightHasIdp = right.idp.length > 0;
+            if (leftHasIdp != rightHasIdp) return leftHasIdp ? NSOrderedAscending : NSOrderedDescending;
+
             NSComparisonResult byName = [(left.qualityLabel ?: @"") localizedCaseInsensitiveCompare:(right.qualityLabel ?: @"")];
             if (byName != NSOrderedSame) return byName;
+
+            BOOL leftMP4 = YouModFormatLooksMP4Family(left);
+            BOOL rightMP4 = YouModFormatLooksMP4Family(right);
+            if (leftMP4 != rightMP4) return leftMP4 ? NSOrderedAscending : NSOrderedDescending;
+
+            if (left.contentLength != right.contentLength)
+                return left.contentLength > right.contentLength ? NSOrderedAscending : NSOrderedDescending;
+            return NSOrderedSame;
+        }];
+
+        if (!hasExplicitTracks) {
+            return formats.count > 0 ? @[formats.firstObject] : @[];
         }
-        
-        BOOL leftMP4 = YouModFormatLooksMP4Family(left);
-        BOOL rightMP4 = YouModFormatLooksMP4Family(right);
-        if (leftMP4 != rightMP4) return leftMP4 ? NSOrderedAscending : NSOrderedDescending;
 
-        if (left.contentLength != right.contentLength)
-            return left.contentLength > right.contentLength ? NSOrderedAscending : NSOrderedDescending;
-        return NSOrderedSame;
-    }];
+        NSMutableArray *unique = [NSMutableArray array];
+        NSMutableSet *seenLang = [NSMutableSet set];
+        NSMutableSet *seenTitle = [NSMutableSet set];
 
-    NSMutableArray *unique = [NSMutableArray array];
-    NSMutableSet *seen = [NSMutableSet set];
-    for (YouModMediaFormat *format in formats) {
-        NSInteger fps = format.fps;
-        NSString *key = video
-            ? [NSString stringWithFormat:@"%@-%ld-%@", format.qualityLabel, (long)fps, YouModMimeDetail(format.mimeType)]
-            : [NSString stringWithFormat:@"%@-%@", format.qualityLabel, YouModMimeDetail(format.mimeType)];
-        if ([seen containsObject:key]) continue;
-        [seen addObject:key];
-        [unique addObject:format];
+        for (YouModMediaFormat *format in formats) {
+            if (format.idp.length == 0 && format.qualityLabel.length == 0) continue;
+
+            NSString *langCode = format.idp.length ? [[format.idp componentsSeparatedByString:@"."] firstObject].lowercaseString : nil;
+            NSString *cleanTitle = [format.qualityLabel.lowercaseString stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
+            NSString *baseTitle = cleanTitle;
+            for (NSString *suffix in @[@" (original)", @" [original]", @" (default)", @" [default]"]) {
+                if ([baseTitle hasSuffix:suffix]) {
+                    baseTitle = [baseTitle substringToIndex:baseTitle.length - suffix.length];
+                    break;
+                }
+            }
+
+            if (langCode.length > 0 && [seenLang containsObject:langCode]) continue;
+            if (baseTitle.length > 0 && [seenTitle containsObject:baseTitle]) continue;
+
+            if (langCode.length > 0) [seenLang addObject:langCode];
+            if (baseTitle.length > 0) [seenTitle addObject:baseTitle];
+
+            [unique addObject:format];
+        }
+
+        if (unique.count == 0 && formats.count > 0) {
+            [unique addObject:formats.firstObject];
+        }
+
+        return unique.copy;
     }
-    return unique.copy;
 }
 
 static UIViewController *YouModPresenterForSender(UIView *sender, YTPlayerViewController *player) {
@@ -1818,7 +1881,7 @@ static void YouModShowAudioTrackSelectionSheet(YTPlayerViewController *player, U
 
     NSMutableArray *items = [NSMutableArray array];
     for (YouModMediaFormat *format in audioFormats) {
-        NSString *rowTitle = format.qualityLabel;
+        NSString *rowTitle = format.qualityLabel.length > 0 ? format.qualityLabel : (format.idp.length > 0 ? format.idp : LOC(@"AUDIO"));
         NSString *subtitle = YouModFormatSubtitle(format, NO);
         [items addObject:[YouModMenuItem itemWithTitle:rowTitle subtitle:subtitle icon:YouModYTIconImage(906, NO, nil) handler:^{
             if (downloadVideo) {
