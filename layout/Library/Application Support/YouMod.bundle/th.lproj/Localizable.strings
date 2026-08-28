@@ -54,9 +54,9 @@
 "DOWNLOAD_MANAGER" = "ตัวจัดการดาวน์โหลด";
 "DOWNLOAD_MANAGER_DESC" = "แทนที่ตัวดาวน์โหลดวิดีโอของ YouTube ด้วยของ YouMod รองรับการดาวน์โหลดวิดีโอ เสียง คำบรรยาย และปกคลิป";
 "DOWNLOAD_BUTTON_POSITION" = "ตำแหน่งปุ่มดาวน์โหลด";
-"UNDER_THE_PLAYER" = "ใต้ตัวเล่น";
+"UNDER_THE_PLAYER" = "ใต้เครื่องเล่น";
 "OVERLAY" = "โอเวอร์เลย์";
-"BOTH" = "ทั้งสอง";
+"BOTH" = "ทั้งคู่";
 "POST_DOWNLOAD_ACTION" = "การกระทำหลังดาวน์โหลด";
 "POST_ACTION_SAVE_PHOTOS" = "บันทึกลงคลังรูปภาพ";
 "POST_ACTION_SHARE" = "แชร์";
