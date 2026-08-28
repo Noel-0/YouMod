@@ -165,6 +165,8 @@
 "HIDE_VOICE_SEARCH_BUTTON_DESC" = "Hide voice search button in the navigation bar.";
 "HIDE_CAST_BUTTON_NAVBAR" = "Hide cast button";
 "HIDE_CAST_BUTTON_NAVBAR_DESC" = "Hide cast button in the navigation bar.";
+"HIDE_MESSAGES_BUTTON" = "Hide messages button";
+"HIDE_MESSAGES_BUTTON_DESC" = "Hide messages button in the navigation bar.";
 
 "FEED" = "Feed";
 "HIDE_SUBBAR" = "Hide subbar";

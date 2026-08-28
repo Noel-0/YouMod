@@ -130,6 +130,7 @@
 #define HideSearch @"YouModHideSearchButton"
 #define HideVoiceSearch @"YouModHideVoiceSearchButton"
 #define HideCastButtonNav @"YouModHideCastButtonNavigationBar"
+#define HideMessages @"YouModHideMessagesButton"
 // Feed
 #define HideSubbar @"YouModHideSubbar"
 #define HideHoriShelf @"YouModHideHoriShelf"
