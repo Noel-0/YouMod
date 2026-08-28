@@ -39,6 +39,7 @@
 @property (nonatomic, assign) int itag;
 @property (nonatomic, assign) int resolution;
 @property (nonatomic, assign) BOOL video;
+@property (nonatomic, assign) BOOL audioIsDefault;
 @end
 
 @implementation YouModMediaFormat
@@ -691,6 +692,7 @@ static YouModMediaFormat *YouModMediaFormatFromStream(YTIFormatStream *stream, B
             if (INTFORVAL(AudioPreferIndex) == 2 && ![audioidp hasPrefix:@"en"]) return nil;
             format.qualityLabel = audio.displayName;
             format.idp = audioidp;
+            format.audioIsDefault = audio.audioIsDefault;
         }
     }
     format.contentLength = stream.contentLength;
@@ -714,6 +716,13 @@ static NSArray <YouModMediaFormat *> *YouModFormatsForPlayer(YTPlayerViewControl
             NSInteger leftFPS = left.fps;
             NSInteger rightFPS = right.fps;
             if (leftFPS != rightFPS) return leftFPS > rightFPS ? NSOrderedAscending : NSOrderedDescending;
+        } else {
+            // Soundtracks are a list of languages, so order them the way a language list
+            // reads — the video's own track first, then by name. Falling through to the
+            // size comparison below would list them by file size, i.e. arbitrarily.
+            if (left.audioIsDefault != right.audioIsDefault) return left.audioIsDefault ? NSOrderedAscending : NSOrderedDescending;
+            NSComparisonResult byName = [(left.qualityLabel ?: @"") localizedCaseInsensitiveCompare:(right.qualityLabel ?: @"")];
+            if (byName != NSOrderedSame) return byName;
         }
         
         BOOL leftMP4 = YouModFormatLooksMP4Family(left);
@@ -1252,7 +1261,7 @@ static void YouModPresentMenu(YTPlayerViewController *player, NSArray <YouModMen
 
     unsigned long long durationMs = videoFormat.durationMs ?: audioFormat.durationMs;
     __weak typeof(self) weakSelf = self;
-    [YMSABR downloadVideoItag:videoFormat.itag audioItag:audioFormat.itag
+    [YMSABR downloadVideoItag:videoFormat.itag audioItag:audioFormat.itag audioStream:audioFormat.source
         progress:^(float fraction, unsigned long long bytesDownloaded, BOOL isAudio) {
             __strong typeof(weakSelf) self = weakSelf;
             if (!self || self.cancelled) return;
@@ -1285,7 +1294,7 @@ static void YouModPresentMenu(YTPlayerViewController *player, NSArray <YouModMen
 
     NSURL *finalURL = YouModUniqueFileURL(fileName, @"m4a");
     __weak typeof(self) weakSelf = self;
-    [YMSABR downloadAudioItag:audioFormat.itag
+    [YMSABR downloadAudioItag:audioFormat.itag audioStream:audioFormat.source
         progress:^(float fraction, unsigned long long bytesDownloaded) {
             __strong typeof(weakSelf) self = weakSelf;
             if (!self || self.cancelled) return;
@@ -1797,7 +1806,7 @@ static void YouModShowAudioTrackSelectionSheet(YTPlayerViewController *player, U
 
     // Skip the audio-track chooser for a single format, or the server path (which
     // can't fetch a chosen track). Direct and on-device SABR both honor the choice.
-    if (audioFormats.count == 1 || INTFORVAL(DownloadMethod) == DownloadMethodServer || INTFORVAL(DownloadMethod) == DownloadMethodOnDevice) {
+    if (audioFormats.count == 1 || INTFORVAL(DownloadMethod) == DownloadMethodServer) {
         YouModMediaFormat *selectedFormat = audioFormats.firstObject;
         if (downloadVideo) {
             [[YouModDownloadCoordinator sharedCoordinator] startVideoDownloadWithVideoFormat:videoFormat audioFormat:selectedFormat fileName:fileName presenter:presenter videoID:player.currentVideoID];

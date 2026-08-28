@@ -633,6 +633,10 @@ typedef NS_ENUM(NSUInteger, GestureSection) {
 - (int)fps;
 - (YTIAudioTrack *)audioTrack;
 - (int)itag;
+// Format qualifier that distinguishes same-itag variants of a stream (soundtrack
+// language, DRC). The SABR FormatId carries the same value, so it — not the itag — is
+// what names a specific audio track on the wire.
+- (NSString *)xtags;
 @end
 
 @interface YTIFormattedString (YouMod)
@@ -872,11 +876,17 @@ typedef NS_ENUM(NSInteger, YouModTranslationState) {
 
 // On-device SABR downloader (SABRDownload.x). Produces two elementary files (video
 // mp4 + audio m4a) for the existing muxer; progress/completion on the main queue.
+//
+// Every language dub of a video shares ONE audio itag (140) and differs only in the
+// SABR FormatId's xtags, so an itag alone cannot name a soundtrack. `audioStream` is
+// the picked audio format straight out of the player response — the engine reads the
+// track identity off it and matches the corresponding entry in the captured
+// available-format list. Pass nil for "no preference" (first matching format).
 @interface YMSABR : NSObject
-+ (void)downloadVideoItag:(int)videoItag audioItag:(int)audioItag
++ (void)downloadVideoItag:(int)videoItag audioItag:(int)audioItag audioStream:(YTIFormatStream *)audioStream
                  progress:(void (^)(float fraction, unsigned long long bytesDownloaded, BOOL isAudio))progress
                completion:(void (^)(NSURL *videoURL, NSURL *audioURL, NSString *err))completion;
-+ (void)downloadAudioItag:(int)audioItag
++ (void)downloadAudioItag:(int)audioItag audioStream:(YTIFormatStream *)audioStream
                  progress:(void (^)(float fraction, unsigned long long bytesDownloaded))progress
                completion:(void (^)(NSURL *audioURL, NSString *err))completion;
 + (void)cancelCurrent;

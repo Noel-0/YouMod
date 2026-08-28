@@ -200,7 +200,11 @@ static NSString *GetCacheSize() { // YTLite - @dayanch96
             [YMTextSegment(YMLOC(@"DOWNLOAD_BUTTON_POSITION"), DownloadButtonPosition, (@[YMLOC(@"UNDER_THE_PLAYER"), YMLOC(@"OVERLAY"), YMLOC(@"BOTH")]), 0) visibleWhenBoolKey:DownloadManager],
             YMToggle(YMLOC(@"ADD_SHORTS_DOWNLOAD"), YMLOC(@"ADD_SHORTS_DOWNLOAD_DESC"), AddDownloadToShorts),
             [YMTextSegment(YMLOC(@"POST_DOWNLOAD_ACTION"), PostDownloadAction, (@[YMLOC(@"POST_ACTION_SAVE_PHOTOS"), YMLOC(@"POST_ACTION_SHARE"), YMLOC(@"POST_ACTION_ASK")]), 0) visibleWhenAnyBoolKey:@[DownloadManager, AddDownloadToShorts, DownloadComment, DownloadPost]],
-            [[YMTextSegment(YMLOC(@"AUDIO_TRACK"), AudioPreferIndex, (@[YMLOC(@"SHOW_OPTIONS"), YMLOC(@"ORIGINAL"), YMLOC(@"ENGLISH")]), 0) visibleWhenKey:DownloadMethod equals:0] visibleWhenAnyBoolKey:@[DownloadManager, AddDownloadToShorts]],
+            // Shown for every method that can actually honour a soundtrack choice. The
+            // filter this drives (YouModMediaFormatFromStream) is not gated on the
+            // method, so hiding the row while it still applies would leave the list
+            // silently filtered with no visible control.
+            [[YMTextSegment(YMLOC(@"AUDIO_TRACK"), AudioPreferIndex, (@[YMLOC(@"SHOW_OPTIONS"), YMLOC(@"ORIGINAL"), YMLOC(@"ENGLISH")]), 0) visibleWhenKey:DownloadMethod inValues:@[@(DownloadMethodDirect), @(DownloadMethodOnDevice)]] visibleWhenAnyBoolKey:@[DownloadManager, AddDownloadToShorts]],
             [YMPicker(YMLOC(@"DOWNLOAD_METHOD"), YMLOC(@"DOWNLOAD_METHOD_DESC"), DownloadMethod, (@[YMLOC(@"METHOD_DIRECT"), YMLOC(@"METHOD_SERVER"), YMLOC(@"METHOD_ONDEVICE")]), 0) visibleWhenAnyBoolKey:@[DownloadManager, AddDownloadToShorts]],
             [[YMPicker(YMLOC(@"DOWNLOAD_SERVER"), YMLOC(@"CHOOSE_DOWNLOAD_SERVER"), DownloadServerIndex, (@[YMLOC(@"SERVER_EUROPRE1"), YMLOC(@"SERVER_ASIA1")]), 0) visibleWhenKey:DownloadMethod equals:1] visibleWhenAnyBoolKey:@[DownloadManager, AddDownloadToShorts]],
             YMToggle(YMLOC(@"DOWNLOAD_COMMENT"), YMLOC(@"DOWNLOAD_COMMENT_DESC"), DownloadComment),
