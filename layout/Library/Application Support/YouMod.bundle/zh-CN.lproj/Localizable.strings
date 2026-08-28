@@ -182,7 +182,7 @@
 "KEEP_SHORTS_SUBSCRIPT" = "在订阅中保留 Shorts";
 "KEEP_SHORTS_SUBSCRIPT_DESC" = "防止从订阅标签页中移除 Shorts。";
 "HIDE_SEARCH_HISTORY" = "隐藏搜索历史";
-"HIDE_SEARCH_HISTORY_DESC" = "使用搜索栏时隐藏之前的搜索历史和建议。\\n注意：您的搜索历史在其他 YouTube 客户端中仍可访问。";
+"HIDE_SEARCH_HISTORY_DESC" = "使用搜索栏时隐藏之前的搜索历史和建议。\n注意：您的搜索历史在其他 YouTube 客户端中仍可访问。";
 "REMOVE_CHANNEL_COMMUNITY_BUTTON" = "移除社区按钮";
 "REMOVE_CHANNEL_COMMUNITY_BUTTON_DESC" = "移除频道主页顶部的社区按钮。";
 "REMOVE_CHANNEL_SPONSOR_BUTTON" = "移除加入会员/赞助按钮";
@@ -440,7 +440,7 @@
 "LEARNING_TAB" = "学习";
 "MANAGE_TABS" = "管理标签";
 "MANAGE_TABS_DESC" = "重新排列和开关标签";
-"TAB_REORDER_HINT" = "拖拽以重新排列。开关以显示/隐藏。\\n也可通过长按标签栏中的第一个标签来访问标签设置。";
+"TAB_REORDER_HINT" = "拖拽以重新排列。开关以显示/隐藏。\n也可通过长按标签栏中的第一个标签来访问标签设置。";
 "TAB_LIMIT" = "标签数量限制";
 "TAB_LIMIT_DESC" = "最多仅允许 6 个标签。";
 "ZERO_TAB_DESC" = "至少需要启用 1 个标签。";
@@ -518,9 +518,9 @@
 "DEVICE_UI" = "界面风格";
 "OPEN_LINK" = "打开链接";
 "FLOATING_KEYBOARD" = "浮动键盘";
-"FLOATING_KEYBOARD_DESC" = "强制启用浮动键盘。适用于伪装为 iPad 风格的 iPhone。\\n注意：仅在选择了 iPad 风格时生效。";
+"FLOATING_KEYBOARD_DESC" = "强制启用浮动键盘。适用于伪装为 iPad 风格的 iPhone。\n注意：仅在选择了 iPad 风格时生效。";
 "AUTO_OPEN_LINK" = "自动检查剪贴板";
-"AUTO_OPEN_LINK_DESC" = "每次打开应用时检查剪贴板中是否有 YouTube 相关链接。\\n为确保正常使用，请前往 iOS 设置 → YouTube → 从其他 App 粘贴，选择“允许”";
+"AUTO_OPEN_LINK_DESC" = "每次打开应用时检查剪贴板中是否有 YouTube 相关链接。\n为确保正常使用，请前往 iOS 设置 → YouTube → 从其他 App 粘贴，选择“允许”";
 
 "SB_DESCRIPTION" = "使用社区提交的数据自动跳过赞助片段。";
 "SB_ENABLE" = "启用 SponsorBlock";
@@ -570,7 +570,7 @@
 "SB_CAT_filler_DESC" = "与视频主题无关的闲聊、笑话或填充片段。";
 
 "SB_SKIPPED" = "已跳过 %@ 片段";
-"SB_DETECTED" = "检测到 %@ 片段。\\n是否跳过该片段？";
+"SB_DETECTED" = "检测到 %@ 片段。\n是否跳过该片段？";
 "SB_SKIP_NOW" = "跳过";
 "SB_UNSKIP" = "取消跳过";
 "SB_JUMPED_TO_HIGHLIGHT" = "已跳转至高光时刻";

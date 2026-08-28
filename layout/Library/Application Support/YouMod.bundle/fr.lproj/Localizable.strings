@@ -182,7 +182,7 @@
 "KEEP_SHORTS_SUBSCRIPT" = "Conserver les Shorts dans Abonnements";
 "KEEP_SHORTS_SUBSCRIPT_DESC" = "Empêche la suppression des Shorts dans l'onglet Abonnements.";
 "HIDE_SEARCH_HISTORY" = "Masquer l'historique de recherche";
-"HIDE_SEARCH_HISTORY_DESC" = "Masque l'historique de recherche et les suggestions lors de l'utilisation de la barre de recherche.\\nREMARQUE : Votre historique de recherche restera accessible sur vos autres appareils.";
+"HIDE_SEARCH_HISTORY_DESC" = "Masque l'historique de recherche et les suggestions lors de l'utilisation de la barre de recherche.\nREMARQUE : Votre historique de recherche restera accessible sur vos autres appareils.";
 "REMOVE_CHANNEL_COMMUNITY_BUTTON" = "Supprimer le bouton Communauté";
 "REMOVE_CHANNEL_COMMUNITY_BUTTON_DESC" = "Supprime le bouton communauté sur les en-têtes de chaîne.";
 "REMOVE_CHANNEL_SPONSOR_BUTTON" = "Supprimer le bouton Rejoindre";
@@ -440,7 +440,7 @@
 "LEARNING_TAB" = "Savoirs & Cultures";
 "MANAGE_TABS" = "Gérer les onglets";
 "MANAGE_TABS_DESC" = "Réordonner et activer/désactiver les onglets";
-"TAB_REORDER_HINT" = "Glissez pour réordonner. Activez/désactivez pour afficher/masquer.\\nLes paramètres d'onglets sont également accessibles en maintenant enfoncé le premier onglet de la barre.";
+"TAB_REORDER_HINT" = "Glissez pour réordonner. Activez/désactivez pour afficher/masquer.\nLes paramètres d'onglets sont également accessibles en maintenant enfoncé le premier onglet de la barre.";
 "TAB_LIMIT" = "Limite d'onglets";
 "TAB_LIMIT_DESC" = "Seulement 6 onglets sont autorisés.";
 "ZERO_TAB_DESC" = "Au moins 1 onglet doit être activé.";
@@ -518,9 +518,9 @@
 "DEVICE_UI" = "Style d'interface";
 "OPEN_LINK" = "Ouvrir le lien";
 "FLOATING_KEYBOARD" = "Clavier flottant";
-"FLOATING_KEYBOARD_DESC" = "Force l'activation du clavier flottant. Utile sur iPhone avec l'usurpation d'interface iPad.\\nNote : Fonctionne UNIQUEMENT lorsque le style iPad est sélectionné.";
+"FLOATING_KEYBOARD_DESC" = "Force l'activation du clavier flottant. Utile sur iPhone avec l'usurpation d'interface iPad.\nNote : Fonctionne UNIQUEMENT lorsque le style iPad est sélectionné.";
 "AUTO_OPEN_LINK" = "Analyse automatique du presse-papiers";
-"AUTO_OPEN_LINK_DESC" = "Analyse le presse-papiers pour détecter les liens liés à YouTube à chaque ouverture de l'application.\\nPour un fonctionnement optimal, allez dans Réglages iOS → YouTube → Autoriser le collage et sélectionnez 'Autoriser'.";
+"AUTO_OPEN_LINK_DESC" = "Analyse le presse-papiers pour détecter les liens liés à YouTube à chaque ouverture de l'application.\nPour un fonctionnement optimal, allez dans Réglages iOS → YouTube → Autoriser le collage et sélectionnez 'Autoriser'.";
 
 "SB_DESCRIPTION" = "Passez automatiquement les segments sponsorisés grâce aux données partagées par la communauté.";
 "SB_ENABLE" = "Activer SponsorBlock";
@@ -570,7 +570,7 @@
 "SB_CAT_filler_DESC" = "Scènes de remplissage ou blagues qui ne sont pas essentielles à la vidéo.";
 
 "SB_SKIPPED" = "Le segment %@ a été passé";
-"SB_DETECTED" = "Segment %@ détecté.\\nVoulez-vous passer ce segment ?";
+"SB_DETECTED" = "Segment %@ détecté.\nVoulez-vous passer ce segment ?";
 "SB_SKIP_NOW" = "Passer";
 "SB_UNSKIP" = "Revenir";
 "SB_JUMPED_TO_HIGHLIGHT" = "Sauté au moment fort";

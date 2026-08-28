@@ -182,7 +182,7 @@
 "KEEP_SHORTS_SUBSCRIPT" = "Keep Shorts in Subscriptions";
 "KEEP_SHORTS_SUBSCRIPT_DESC" = "Prevents removing Shorts from Subscriptions tab.";
 "HIDE_SEARCH_HISTORY" = "Hide search history";
-"HIDE_SEARCH_HISTORY_DESC" = "Hide previous search history and suggestions when using the search bar.\\nNOTE: Your search history will still be accessible in your other YouTube clients.";
+"HIDE_SEARCH_HISTORY_DESC" = "Hide previous search history and suggestions when using the search bar.\nNOTE: Your search history will still be accessible in your other YouTube clients.";
 "REMOVE_CHANNEL_COMMUNITY_BUTTON" = "커뮤니티 버튼 제거";
 "REMOVE_CHANNEL_COMMUNITY_BUTTON_DESC" = "채널 헤더에서 커뮤니티 버튼을 제거합니다.";
 "REMOVE_CHANNEL_SPONSOR_BUTTON" = "가입(스폰서) 버튼 제거";
@@ -440,7 +440,7 @@
 "LEARNING_TAB" = "Learning";
 "MANAGE_TABS" = "Manage tabs";
 "MANAGE_TABS_DESC" = "Reorder and toggle tabs";
-"TAB_REORDER_HINT" = "Drag to reorder. Toggle to show/hide.\\nTab settings are also accessible by long-pressing the first tab in the tab bar.";
+"TAB_REORDER_HINT" = "Drag to reorder. Toggle to show/hide.\nTab settings are also accessible by long-pressing the first tab in the tab bar.";
 "TAB_LIMIT" = "Tab limit";
 "TAB_LIMIT_DESC" = "Only 6 tabs are allowed.";
 "ZERO_TAB_DESC" = "At least 1 tab has to be enabled.";
@@ -518,9 +518,9 @@
 "DEVICE_UI" = "Interface style";
 "OPEN_LINK" = "Open link";
 "FLOATING_KEYBOARD" = "Floating keyboard";
-"FLOATING_KEYBOARD_DESC" = "Force-enables the floating keyboard. Useful for iPhones with iPad style spoofing.\\nNote: Works ONLY when iPad style is selected.";
+"FLOATING_KEYBOARD_DESC" = "Force-enables the floating keyboard. Useful for iPhones with iPad style spoofing.\nNote: Works ONLY when iPad style is selected.";
 "AUTO_OPEN_LINK" = "Auto-check clipboard";
-"AUTO_OPEN_LINK_DESC" = "Check clipboard for YouTube-related links each time the app is opened.\\nFor proper functionality, go to iOS Settings → YouTube → Paste from other apps and select 'Allow'";
+"AUTO_OPEN_LINK_DESC" = "Check clipboard for YouTube-related links each time the app is opened.\nFor proper functionality, go to iOS Settings → YouTube → Paste from other apps and select 'Allow'";
 
 "SB_DESCRIPTION" = "Skip sponsored segments automatically using community-submitted data.";
 "SB_ENABLE" = "Enable SponsorBlock";
@@ -570,7 +570,7 @@
 "SB_CAT_filler_DESC" = "동영상 주제와 직접 관련 없는 잡담, 개그 또는 부가적인 장면입니다.";
 
 "SB_SKIPPED" = "%@ segment has been skipped";
-"SB_DETECTED" = "%@ segment detected.\\nWould you like to skip the segment?";
+"SB_DETECTED" = "%@ segment detected.\nWould you like to skip the segment?";
 "SB_SKIP_NOW" = "Skip";
 "SB_UNSKIP" = "Unskip";
 "SB_JUMPED_TO_HIGHLIGHT" = "Jumped to highlight";
