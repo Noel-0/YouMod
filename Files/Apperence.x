@@ -109,6 +109,14 @@
         self.backgroundColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull traitCollection) {
             return isDarkMode(self) ? [UIColor blackColor] : [UIColor whiteColor];
         }];
+        for (UIView *view in self.subviews) {
+            if ([view isKindOfClass:%c(YTDialogContainerScrollView)]) {
+                view.backgroundColor = [UIColor colorWithDynamicProvider:^UIColor * _Nonnull(UITraitCollection * _Nonnull traitCollection) {
+                    return isDarkMode(view) ? [UIColor blackColor] : [UIColor whiteColor];
+                }];
+                break;
+            }
+        }
     }
 }
 %end
