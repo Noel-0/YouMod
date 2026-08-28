@@ -53,6 +53,10 @@
 "DOWNLOADING" = "Downloading";
 "DOWNLOAD_MANAGER" = "Download manager";
 "DOWNLOAD_MANAGER_DESC" = "Replaces YouTube's video downloader with YouMod one. With ablity to downloading videos, audios, captions, and thumbnails.";
+"DOWNLOAD_BUTTON_POSITION" = "Download button position";
+"UNDER_THE_PLAYER" = "Under the player";
+"OVERLAY" = "Overlay";
+"BOTH" = "Both";
 "POST_DOWNLOAD_ACTION" = "Post-download action";
 "POST_ACTION_SAVE_PHOTOS" = "Save to Photos";
 "POST_ACTION_SHARE" = "Share";

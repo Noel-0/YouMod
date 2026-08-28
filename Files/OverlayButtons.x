@@ -107,7 +107,10 @@ NSArray<YMOverlayButtonSpec *> *YMRegisteredOverlayButtons(void) {
 
 BOOL YMIsOverlayButtonEnabled(NSString *identifier) {
     if (!identifier || identifier.length == 0) return NO;
-    if ([identifier isEqualToString:@"download.video"] && !IS_ENABLED(DownloadManager)) return NO;
+    if ([identifier isEqualToString:@"download.video"]) {
+        if (!IS_ENABLED(DownloadManager)) return NO;
+        return INTFORVAL(DownloadButtonPosition) != DownloadButtonPositionUnderPlayer;
+    }
     if ([identifier isEqualToString:@"sponsorblock.toggle"]) return IS_ENABLED(SBEnabled) && IS_ENABLED(SBShowButton);
     NSArray *savedOrder = [[NSUserDefaults standardUserDefaults] arrayForKey:OverlayButtonOrder];
     if (savedOrder.count > 0) {
@@ -125,7 +128,7 @@ BOOL YMIsOverlayButtonEnabled(NSString *identifier) {
     if ([identifier isEqualToString:@"share.video"]) return IS_ENABLED(ShareButton);
     if ([identifier isEqualToString:@"loop.video"]) return IS_ENABLED(LoopButton);
     if ([identifier isEqualToString:@"caption.video"]) return IS_ENABLED(CaptionButton);
-    if ([identifier isEqualToString:@"download.video"]) return IS_ENABLED(DownloadManager);
+    if ([identifier isEqualToString:@"download.video"]) return IS_ENABLED(DownloadManager) && INTFORVAL(DownloadButtonPosition) != DownloadButtonPositionUnderPlayer;
     return YES;
 }
 
@@ -144,7 +147,7 @@ NSArray<YMOverlayButtonSpec *> *YMOrderedOverlayButtons(void) {
         for (NSDictionary *entry in savedOrder) {
             NSString *ident = entry[@"id"];
             BOOL enabled;
-            if ([ident isEqualToString:@"sponsorblock.toggle"]) {
+            if ([ident isEqualToString:@"sponsorblock.toggle"] || [ident isEqualToString:@"download.video"]) {
                 enabled = YMIsOverlayButtonEnabled(ident);
             } else {
                 enabled = [entry[@"enabled"] boolValue];

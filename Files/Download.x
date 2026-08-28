@@ -2013,6 +2013,7 @@ NSString *YouModGlobalAuthHeader = nil;
 
 void YouModConfigureDownloadButton(_ASDisplayView *view) {
     if (!IS_ENABLED(DownloadManager)) return;
+    if (INTFORVAL(DownloadButtonPosition) == DownloadButtonPositionOverlay) return;
     if (objc_getAssociatedObject(view, @selector(YouModDownloadButtonTapped:))) return;
 
     if ([view.accessibilityIdentifier isEqualToString:@"id.ui.add_to.offline.button"]) {

@@ -53,6 +53,10 @@
 "DOWNLOADING" = "下载中";
 "DOWNLOAD_MANAGER" = "下载管理器";
 "DOWNLOAD_MANAGER_DESC" = "用 YouMod 的下载器替换 YouTube 原生下载器。支持下载视频、音频、字幕和缩略图。";
+"DOWNLOAD_BUTTON_POSITION" = "Download button position";
+"UNDER_THE_PLAYER" = "Under the player";
+"OVERLAY" = "Overlay";
+"BOTH" = "Both";
 "POST_DOWNLOAD_ACTION" = "下载后操作";
 "POST_ACTION_SAVE_PHOTOS" = "保存到相册";
 "POST_ACTION_SHARE" = "分享";

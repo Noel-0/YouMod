@@ -2088,9 +2088,7 @@ static const void *kYMOverlaySavedScrollEdgeAppearanceKey = &kYMOverlaySavedScro
     cell.imageView.image = btnIcon;
     cell.imageView.tintColor = [UIColor labelColor];
 
-    if ([buttonID isEqualToString:@"download.video"]) {
-        sw.hidden = !IS_ENABLED(DownloadManager);
-    } else if ([buttonID isEqualToString:@"sponsorblock.toggle"]) {
+    if ([buttonID isEqualToString:@"download.video"] || [buttonID isEqualToString:@"sponsorblock.toggle"]) {
         sw.hidden = YES;
     } else {
         sw.hidden = NO;

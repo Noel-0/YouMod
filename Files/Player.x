@@ -1552,7 +1552,7 @@ static void YouModFilterVideoButtons(_ASDisplayView *view, NSString *iden) {
         shouldFilter = YES;
     } else if ([iden isEqualToString:@"id.video.add_to.button"] && IS_ENABLED(RemoveVideoSaveButton)) {
         shouldFilter = YES;
-    } else if ([iden isEqualToString:@"id.ui.add_to.offline.button"] && IS_ENABLED(RemoveVideoDownloadButton)) {
+    } else if ([iden isEqualToString:@"id.ui.add_to.offline.button"] && (IS_ENABLED(RemoveVideoDownloadButton) || (IS_ENABLED(DownloadManager) && INTFORVAL(DownloadButtonPosition) == DownloadButtonPositionOverlay))) {
         shouldFilter = YES;
     } else if ([iden isEqualToString:@"clip_button.eml"] && IS_ENABLED(RemoveVideoClipButton)) {
         shouldFilter = YES;

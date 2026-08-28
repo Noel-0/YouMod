@@ -197,6 +197,7 @@ static NSString *GetCacheSize() { // YTLite - @dayanch96
     // Downloading
     NSArray<YMSettingsItem *> *downloadingItems = @[
             YMToggle(YMLOC(@"DOWNLOAD_MANAGER"), YMLOC(@"DOWNLOAD_MANAGER_DESC"), DownloadManager),
+            [YMTextSegment(YMLOC(@"DOWNLOAD_BUTTON_POSITION"), DownloadButtonPosition, (@[YMLOC(@"UNDER_THE_PLAYER"), YMLOC(@"OVERLAY"), YMLOC(@"BOTH")]), 0) visibleWhenBoolKey:DownloadManager],
             YMToggle(YMLOC(@"ADD_SHORTS_DOWNLOAD"), YMLOC(@"ADD_SHORTS_DOWNLOAD_DESC"), AddDownloadToShorts),
             [YMTextSegment(YMLOC(@"POST_DOWNLOAD_ACTION"), PostDownloadAction, (@[YMLOC(@"POST_ACTION_SAVE_PHOTOS"), YMLOC(@"POST_ACTION_SHARE"), YMLOC(@"POST_ACTION_ASK")]), 0) visibleWhenAnyBoolKey:@[DownloadManager, AddDownloadToShorts, DownloadComment, DownloadPost]],
             [[YMTextSegment(YMLOC(@"AUDIO_TRACK"), AudioPreferIndex, (@[YMLOC(@"SHOW_OPTIONS"), YMLOC(@"ORIGINAL"), YMLOC(@"ENGLISH")]), 0) visibleWhenKey:DownloadMethod equals:0] visibleWhenAnyBoolKey:@[DownloadManager, AddDownloadToShorts]],
@@ -325,7 +326,6 @@ static NSString *GetCacheSize() { // YTLite - @dayanch96
             YMToggle(YMLOC(@"REMOVE_VIDEO_DISLIKE_BUTTON"), YMLOC(@"REMOVE_VIDEO_DISLIKE_BUTTON_DESC"), RemoveVideoDislikeButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_SHARE_BUTTON"), YMLOC(@"REMOVE_VIDEO_SHARE_BUTTON_DESC"), RemoveVideoShareButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_SAVE_BUTTON"), YMLOC(@"REMOVE_VIDEO_SAVE_BUTTON_DESC"), RemoveVideoSaveButton),
-            YMToggle(YMLOC(@"REMOVE_VIDEO_DOWNLOAD_BUTTON"), YMLOC(@"REMOVE_VIDEO_DOWNLOAD_BUTTON_DESC"), RemoveVideoDownloadButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_CLIP_BUTTON"), YMLOC(@"REMOVE_VIDEO_CLIP_BUTTON_DESC"), RemoveVideoClipButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_REMIX_BUTTON"), YMLOC(@"REMOVE_VIDEO_REMIX_BUTTON_DESC"), RemoveVideoRemixButton),
             YMToggle(YMLOC(@"REMOVE_VIDEO_LIVE_CHAT_BUTTON"), YMLOC(@"REMOVE_VIDEO_LIVE_CHAT_BUTTON_DESC"), RemoveVideoLiveChatButton),

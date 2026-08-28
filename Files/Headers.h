@@ -106,6 +106,10 @@
 #define GlobalSavedNormalRate @"YouModGlobalSavedNormalRate"
 // Downloading
 #define DownloadManager @"YouModDownloadManager"
+#define DownloadButtonPosition @"YouModDownloadButtonPosition"
+#define DownloadButtonPositionUnderPlayer 0
+#define DownloadButtonPositionOverlay 1
+#define DownloadButtonPositionBoth 2
 #define PostDownloadAction @"YouModPostDownloadAction"
 #define PostDownloadActionSaveToPhotos 0
 #define PostDownloadActionShare 1
