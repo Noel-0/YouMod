@@ -679,6 +679,28 @@ static NSArray<SBSegment *> *sbActivePlayerSegments = nil;
 
 static NSString *const SBSegmentMarkerLayerName = @"SBSegmentMarkerLayer";
 
+// Round a segment marker to match YouTube's own player bar.
+//
+// The bar is a capsule, and YouTube shapes it with `layer.mask = CAShapeLayer` on the
+// decoration view rather than a cornerRadius — a mask composites a layer AND all its
+// sublayers, so our markers are already trimmed to the capsule silhouette, caps
+// included. That means no per-corner logic is needed: rounding all four corners is
+// correct both mid-bar and at the bar's ends, and anything overflowing gets clipped.
+//
+// The radius is clamped to half the marker's width so a narrow marker
+// (SBMarkerMinWidth / SBPoiMarkerWidth) stays a pill instead of collapsing to a dot.
+//
+// The corner curve is left at CALayer's default (circular), which is what produces a
+// stadium shape at radius = height/2 — the bar's silhouette. A continuous curve is the
+// wrong tool here: its control points run roughly 1.5x the radius along each edge, so
+// on a 2pt-tall bar the two corners' curves overlap and the path degenerates.
+static void SBApplyMarkerRounding(CALayer *layer) {
+    if (!layer) return;
+    CGFloat height = layer.bounds.size.height, width = layer.bounds.size.width;
+    if (height <= 0 || width <= 0) return;
+    layer.cornerRadius = MIN(height / 2.0, width / 2.0);
+}
+
 static BOOL SBGetDecorationViewTimeRange(UIView *view, CGFloat *outStart, CGFloat *outEnd) {
     if (!view) return NO;
     YTIPlayerBarDecorationModel *model = [view valueForKey:@"_model"];
@@ -738,6 +760,7 @@ static void SBRebuildMarkersInDecorationView(UIView *view) {
                 markerLayer.frame = CGRectMake(x, 0, w, barHeight);
                 markerLayer.backgroundColor = [segment segmentColor].CGColor;
                 markerLayer.masksToBounds = YES;
+                SBApplyMarkerRounding(markerLayer);
                 objc_setAssociatedObject(markerLayer, @selector(sbSegmentData), @[@(frac), @(frac), @(YES)], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
                 [view.layer addSublayer:markerLayer];
@@ -758,6 +781,7 @@ static void SBRebuildMarkersInDecorationView(UIView *view) {
                 markerLayer.frame = CGRectMake(x, 0, w, barHeight);
                 markerLayer.backgroundColor = [segment segmentColor].CGColor;
                 markerLayer.masksToBounds = YES;
+                SBApplyMarkerRounding(markerLayer);
                 objc_setAssociatedObject(markerLayer, @selector(sbSegmentData), @[@(fracStart), @(fracEnd), @(NO)], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
                 [view.layer addSublayer:markerLayer];
@@ -803,6 +827,9 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
                     CGFloat w = MAX(SBMarkerMinWidth, (fracEnd - fracStart) * barWidth);
                     layer.frame = CGRectMake(x, 0, w, barHeight);
                 }
+                // Re-derive the radius: the bar is 2pt windowed and 4pt fullscreen, and
+                // the width changes on every re-layout.
+                SBApplyMarkerRounding(layer);
             }
         }
     }
@@ -856,6 +883,9 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
         else if (w < SBMarkerMinWidth) w = SBMarkerMinWidth;
 
         sub.frame = CGRectMake(x, self.frame.origin.y, w, self.bounds.size.height);
+        // The miniplayer bar carries no mask of its own, so the marker's own rounding
+        // is the only thing shaping it.
+        SBApplyMarkerRounding(sub.layer);
     }
 }
 %end
@@ -1032,6 +1062,7 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
         marker.backgroundColor = [segment segmentColor];
         marker.userInteractionEnabled = NO;
         marker.tag = SBSegmentMarkerTag;
+        SBApplyMarkerRounding(marker.layer);
         objc_setAssociatedObject(marker, @selector(sbSegmentData), @[@(startFrac), @(endFrac), @(isPoi)], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
         // Insert above the track (main player bar) so the marker paints on it;
