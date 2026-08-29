@@ -883,9 +883,6 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
         else if (w < SBMarkerMinWidth) w = SBMarkerMinWidth;
 
         sub.frame = CGRectMake(x, self.frame.origin.y, w, self.bounds.size.height);
-        // The miniplayer bar carries no mask of its own, so the marker's own rounding
-        // is the only thing shaping it.
-        SBApplyMarkerRounding(sub.layer);
     }
 }
 %end
@@ -1062,7 +1059,6 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
         marker.backgroundColor = [segment segmentColor];
         marker.userInteractionEnabled = NO;
         marker.tag = SBSegmentMarkerTag;
-        SBApplyMarkerRounding(marker.layer);
         objc_setAssociatedObject(marker, @selector(sbSegmentData), @[@(startFrac), @(endFrac), @(isPoi)], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
         // Insert above the track (main player bar) so the marker paints on it;
