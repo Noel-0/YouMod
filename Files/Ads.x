@@ -302,6 +302,13 @@ static NSMutableArray <YTIItemSectionRenderer *> *filteredArray(NSArray <YTIItem
     NSString *iden = [overlay overlayIdentifier];
     if ([iden isEqualToString:@"player_overlay_product_in_video"]) return;
     if ([iden isEqualToString:@"player_overlay_paid_content"] && IS_ENABLED(HidePaidPromoOverlay)) return;
+    if ([iden isEqualToString:@"player_overlay_timely_shelf"]) {
+        id timeshelf = [self performSelector:@selector(timelyShelfStateManager)];
+        if (timeshelf) {
+            [timeshelf performSelector:@selector(removeTimelyShelfOverlay:) withObject:overlay];
+        }
+        return;
+    }
     %orig;
 }
 %end
