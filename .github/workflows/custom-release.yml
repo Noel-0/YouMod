@@ -29,6 +29,7 @@ jobs:
       issues: write
     env:
       UPSTREAM_REPOSITORY: Tonwalter888/YouMod
+      TARGET_REPOSITORY: Noel-0/YouMod
       PATCH_COMMIT: 906a3e11d5ecf50ceccf86e2e3760de4bdf68419
       FAILURE_TITLE: "[automation] Custom YouMod release requires attention"
     steps:
@@ -71,7 +72,7 @@ jobs:
           PUBLISH: ${{ steps.source.outputs.publish }}
         run: |
           exists=false
-          if [[ "$PUBLISH" == true ]] && gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+          if [[ "$PUBLISH" == true ]] && gh api "repos/$TARGET_REPOSITORY/releases/tags/$RELEASE_TAG" >/dev/null 2>&1; then
             exists=true
           fi
           echo "exists=$exists" >> "$GITHUB_OUTPUT"
@@ -181,7 +182,7 @@ jobs:
           RELEASE_TAG: ${{ steps.source.outputs.release_tag }}
           UPSTREAM_REF: ${{ steps.source.outputs.ref }}
         run: |
-          gh release create "$RELEASE_TAG" dist/* \
+          gh release create "$RELEASE_TAG" dist/* --repo "$TARGET_REPOSITORY" \
             --title "Custom YouMod for $UPSTREAM_REF" \
             --notes "Compiled YouMod package only. No YouTube IPA or signing credentials are included."
 
@@ -190,9 +191,9 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh issue list --state open --search "$FAILURE_TITLE in:title" --json number --jq '.[].number' |
+          gh issue list --repo "$TARGET_REPOSITORY" --state open --search "$FAILURE_TITLE in:title" --json number --jq '.[].number' |
           while read -r issue; do
-            [[ -n "$issue" ]] && gh issue close "$issue" --comment "Resolved by run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID."
+            [[ -n "$issue" ]] && gh issue close "$issue" --repo "$TARGET_REPOSITORY" --comment "Resolved by run $GITHUB_SERVER_URL/$TARGET_REPOSITORY/actions/runs/$GITHUB_RUN_ID."
           done
 
       - name: Open or update automation failure issue
@@ -203,12 +204,12 @@ jobs:
         run: |
           body="Upstream ref: \`$UPSTREAM_REF\`
           Patch commit: \`$PATCH_COMMIT\`
-          Failed run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+          Failed run: $GITHUB_SERVER_URL/$TARGET_REPOSITORY/actions/runs/$GITHUB_RUN_ID
 
           No release was published. Manual review is required."
-          issue=$(gh issue list --state open --search "$FAILURE_TITLE in:title" --json number --jq '.[0].number // empty')
+          issue=$(gh issue list --repo "$TARGET_REPOSITORY" --state open --search "$FAILURE_TITLE in:title" --json number --jq '.[0].number // empty')
           if [[ -n "$issue" ]]; then
-            gh issue comment "$issue" --body "$body"
+            gh issue comment "$issue" --repo "$TARGET_REPOSITORY" --body "$body"
           else
-            gh issue create --title "$FAILURE_TITLE" --body "$body"
+            gh issue create --repo "$TARGET_REPOSITORY" --title "$FAILURE_TITLE" --body "$body"
           fi
