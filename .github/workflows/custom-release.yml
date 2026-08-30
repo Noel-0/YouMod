@@ -64,7 +64,7 @@ jobs:
             exit 1
           fi
           safe_ref=$(printf '%s' "$ref" | tr -c 'A-Za-z0-9._-' '-')
-          release_tag="custom-youmod-$safe_ref"
+          release_tag="custom-youmod-$safe_ref-jailed-v1"
           publish=false
           [[ "$EVENT_NAME" == schedule ]] && publish=true
           [[ "${{ inputs.publish }}" == true ]] && publish=true
@@ -137,11 +137,19 @@ jobs:
           scripts/validate-tweak.sh "$package"
           mkdir -p dist
           cp "$package" dist/
+          package_dylib=$(scripts/validate-tweak.sh "$package" | tail -1)
+          cp "$package_dylib" dist/YouMod.dylib
+          install_name_tool -id '@rpath/YouMod.dylib' dist/YouMod.dylib
+          install_name_tool -change '/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate' '@rpath/CydiaSubstrate.framework/CydiaSubstrate' dist/YouMod.dylib
+          codesign --force --sign - dist/YouMod.dylib
+          scripts/validate-jailed-dylib.sh dist/YouMod.dylib
           package_name=$(basename "$package")
           package_sha=$(shasum -a 256 "dist/$package_name" | awk '{print $1}')
+          dylib_sha=$(shasum -a 256 dist/YouMod.dylib | awk '{print $1}')
           version=$(awk '/^Version:/{print $2}' source/control)
           echo "name=$package_name" >> "$GITHUB_OUTPUT"
           echo "sha=$package_sha" >> "$GITHUB_OUTPUT"
+          echo "dylib_sha=$dylib_sha" >> "$GITHUB_OUTPUT"
           echo "version=$version" >> "$GITHUB_OUTPUT"
 
       - name: Write provenance
@@ -153,6 +161,7 @@ jobs:
           PATCH_STATUS: ${{ steps.patch.outputs.patch_status }}
           PACKAGE_NAME: ${{ steps.package.outputs.name }}
           PACKAGE_SHA: ${{ steps.package.outputs.sha }}
+          DYLIB_SHA: ${{ steps.package.outputs.dylib_sha }}
           YOUMOD_VERSION: ${{ steps.package.outputs.version }}
         run: |
           python3 - <<'PY'
@@ -168,6 +177,7 @@ jobs:
               "youmod_version": os.environ["YOUMOD_VERSION"],
               "package_name": os.environ["PACKAGE_NAME"],
               "package_sha256": os.environ["PACKAGE_SHA"],
+              "dylib_sha256": os.environ["DYLIB_SHA"],
               "built_at": datetime.now(timezone.utc).isoformat(),
           }
           with open("dist/provenance.json", "w") as f:

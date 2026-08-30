@@ -38,7 +38,7 @@ tmp=$(mktemp -d "${TMPDIR:-/tmp}/youmod-builder.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT INT TERM
 
 mkdir -p "$tmp/release"
-gh release download "$release_tag" --repo "$repo" --dir "$tmp/release" --pattern '*.deb' --pattern 'provenance.json'
+gh release download "$release_tag" --repo "$repo" --dir "$tmp/release" --pattern '*.deb' --pattern 'YouMod.dylib' --pattern 'provenance.json'
 deb=$(find "$tmp/release" -maxdepth 1 -type f -name '*.deb' -print -quit)
 [[ -n "$deb" ]] || fail "Release $release_tag has no .deb package"
 [[ -f "$tmp/release/provenance.json" ]] || fail "Release $release_tag has no provenance.json"
@@ -56,10 +56,18 @@ mkdir "$tmp/package" "$tmp/app"
   tar -xf "$data_archive"
 ) || fail "Unable to extract YouMod package"
 
-new_dylib=$(find "$tmp/package" -type f -name 'YouMod.dylib' -print -quit)
-[[ -n "$new_dylib" ]] || fail "YouMod.dylib is missing from the package"
+new_dylib="$tmp/release/YouMod.dylib"
+[[ -f "$new_dylib" ]] || fail "Release is missing the jailed-compatible YouMod.dylib"
+expected_dylib_sha=$(plutil -extract dylib_sha256 raw -o - "$tmp/release/provenance.json" 2>/dev/null) || fail "Provenance has no dylib checksum"
+actual_dylib_sha=$(shasum -a 256 "$new_dylib" | awk '{print $1}')
+[[ "$actual_dylib_sha" == "$expected_dylib_sha" ]] || fail "Dylib checksum mismatch"
 file "$new_dylib" | grep -q 'Mach-O' || fail "Replacement dylib is not Mach-O"
 lipo -archs "$new_dylib" | tr ' ' '\n' | grep -qx arm64 || fail "Replacement dylib has no arm64 slice"
+dependencies=$(otool -L "$new_dylib" | tail -n +2 | awk '{print $1}')
+printf '%s\n' "$dependencies" | grep -qx '@rpath/YouMod.dylib' || fail "Replacement dylib has a non-jailed install name"
+printf '%s\n' "$dependencies" | grep -qx '@rpath/CydiaSubstrate.framework/CydiaSubstrate' || fail "Replacement dylib has a non-jailed Substrate dependency"
+bad_dependencies=$(printf '%s\n' "$dependencies" | grep '^/' | grep -Ev '^/usr/lib/|^/System/Library/' || true)
+[[ -z "$bad_dependencies" ]] || fail "Replacement dylib has unsupported absolute dependencies: $bad_dependencies"
 
 file "$base_ipa" | grep -Eq 'Zip archive data|iOS App Zip archive data' || fail "base.ipa is not a ZIP/IPA"
 ditto -x -k "$base_ipa" "$tmp/app" || fail "Unable to extract base.ipa"

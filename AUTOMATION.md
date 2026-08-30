@@ -10,7 +10,8 @@ automation around that patch.
 `.github/workflows/custom-release.yml` checks the newest upstream tag daily.
 It skips the patch if the regression check proves that upstream already has the
 fix; otherwise it cherry-picks the isolated patch. Successful scheduled builds
-publish only a compiled `.deb` and `provenance.json`. Failures open one tracking
+publish a compiled `.deb`, a normalized jailed-compatible `YouMod.dylib`, and
+`provenance.json`. Failures open one tracking
 issue and never publish a release.
 
 The macOS LaunchAgent checks those releases daily. When `Input/base.ipa` exists,
