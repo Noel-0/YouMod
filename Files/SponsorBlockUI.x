@@ -714,7 +714,18 @@ static BOOL SBGetDecorationViewTimeRange(UIView *view, CGFloat *outStart, CGFloa
     return NO;
 }
 
-static BOOL SBIsMainPlayer = NO;
+// Whether a decoration view belongs to the main player's bar rather than the feed's
+// inline-muted-playback bar. Only the main player's markers are rounded.
+//
+// Both hosts lay out a YTModularPlayerBarView holding the same decoration views, so
+// the host has to be read off the view tree: only the main player's bar sits inside a
+// YTInlinePlayerBarContainerView. It must be read from the view on each call rather
+// than cached, because layoutSubviews fires on its own schedule, for either host.
+static BOOL SBDecorationViewIsInMainPlayer(UIView *view) {
+    for (UIView *ancestor = view.superview; ancestor; ancestor = ancestor.superview)
+        if ([ancestor isKindOfClass:%c(YTInlinePlayerBarContainerView)]) return YES;
+    return NO;
+}
 
 static void SBRebuildMarkersInDecorationView(UIView *view) {
     if (!view) return;
@@ -738,6 +749,8 @@ static void SBRebuildMarkersInDecorationView(UIView *view) {
     NSArray<SBSegment *> *segments = sbActivePlayerSegments;
     if (!segments || segments.count == 0) return;
 
+    BOOL isMainPlayer = SBDecorationViewIsInMainPlayer(view);
+
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
 
@@ -757,7 +770,7 @@ static void SBRebuildMarkersInDecorationView(UIView *view) {
                 markerLayer.frame = CGRectMake(x, 0, w, barHeight);
                 markerLayer.backgroundColor = [segment segmentColor].CGColor;
                 markerLayer.masksToBounds = YES;
-                if (SBIsMainPlayer) SBApplyMarkerRounding(markerLayer);
+                if (isMainPlayer) SBApplyMarkerRounding(markerLayer);
                 objc_setAssociatedObject(markerLayer, @selector(sbSegmentData), @[@(frac), @(frac), @(YES)], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
                 [view.layer addSublayer:markerLayer];
@@ -778,7 +791,7 @@ static void SBRebuildMarkersInDecorationView(UIView *view) {
                 markerLayer.frame = CGRectMake(x, 0, w, barHeight);
                 markerLayer.backgroundColor = [segment segmentColor].CGColor;
                 markerLayer.masksToBounds = YES;
-                if (SBIsMainPlayer) SBApplyMarkerRounding(markerLayer);
+                if (isMainPlayer) SBApplyMarkerRounding(markerLayer);
                 objc_setAssociatedObject(markerLayer, @selector(sbSegmentData), @[@(fracStart), @(fracEnd), @(NO)], OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 
                 [view.layer addSublayer:markerLayer];
@@ -804,6 +817,8 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
         return;
     }
 
+    BOOL isMainPlayer = SBDecorationViewIsInMainPlayer(view);
+
     BOOL hasMarkers = NO;
     [CATransaction begin];
     [CATransaction setDisableActions:YES];
@@ -826,7 +841,7 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
                 }
                 // Re-derive the radius: the bar is 2pt windowed and 4pt fullscreen, and
                 // the width changes on every re-layout.
-                if (SBIsMainPlayer) SBApplyMarkerRounding(layer);
+                if (isMainPlayer) SBApplyMarkerRounding(layer);
             }
         }
     }
@@ -970,7 +985,6 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
         for (UIView *sub in playerBar.subviews) {
             if ([sub isKindOfClass:%c(YTPlayerBarProgressDecorationView)] ||
                 [sub isKindOfClass:%c(YTPlayerBarRectangleDecorationView)]) {
-                SBIsMainPlayer = YES;  
                 [(YTPlayerBarProgressDecorationView *)sub sb_updateSegmentMarkers];
             }
         }
@@ -1010,7 +1024,6 @@ static void SBRenderMarkersInDecorationView(UIView *view) {
             for (UIView *sub in playerBar.subviews) {
                 if ([sub isKindOfClass:%c(YTPlayerBarProgressDecorationView)] ||
                     [sub isKindOfClass:%c(YTPlayerBarRectangleDecorationView)]) {
-                    SBIsMainPlayer = NO;
                     [(YTPlayerBarProgressDecorationView *)sub sb_updateSegmentMarkers];
                 }
             }
