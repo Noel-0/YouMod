@@ -3,6 +3,8 @@ set -eu
 
 package=${1:?usage: validate-tweak.sh package.deb}
 test -s "$package"
+package_dir=$(cd "$(dirname "$package")" && pwd)
+package="$package_dir/$(basename "$package")"
 
 tmp=$(mktemp -d "${TMPDIR:-/tmp}/youmod-validate.XXXXXX")
 trap 'rm -rf "$tmp"' EXIT INT TERM
