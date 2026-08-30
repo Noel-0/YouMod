@@ -2,6 +2,7 @@
 set -eu
 
 package=${1:?usage: validate-tweak.sh package.deb}
+copy_to=${2:-}
 test -s "$package"
 package_dir=$(cd "$(dirname "$package")" && pwd)
 package="$package_dir/$(basename "$package")"
@@ -25,4 +26,9 @@ test -n "$dylib" || {
 
 file "$dylib" | grep -q 'Mach-O'
 lipo -archs "$dylib" | tr ' ' '\n' | grep -qx 'arm64'
-echo "$dylib"
+if test -n "$copy_to"; then
+  cp "$dylib" "$copy_to"
+  echo "$copy_to"
+else
+  echo "$dylib"
+fi

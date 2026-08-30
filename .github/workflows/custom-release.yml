@@ -137,8 +137,7 @@ jobs:
           scripts/validate-tweak.sh "$package"
           mkdir -p dist
           cp "$package" dist/
-          package_dylib=$(scripts/validate-tweak.sh "$package" | tail -1)
-          cp "$package_dylib" dist/YouMod.dylib
+          scripts/validate-tweak.sh "$package" dist/YouMod.dylib
           install_name_tool -id '@rpath/YouMod.dylib' dist/YouMod.dylib
           install_name_tool -change '/Library/Frameworks/CydiaSubstrate.framework/CydiaSubstrate' '@rpath/CydiaSubstrate.framework/CydiaSubstrate' dist/YouMod.dylib
           codesign --force --sign - dist/YouMod.dylib
