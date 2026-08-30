@@ -53,7 +53,16 @@ jobs:
             ref=${ref#upstream/}
           fi
           test -n "$ref"
-          commit=$(git rev-parse "refs/tags/upstream/$ref^{commit}" 2>/dev/null || git rev-parse "upstream/$ref^{commit}" 2>/dev/null || git rev-parse "$ref^{commit}")
+          if commit=$(git rev-parse --verify -q "refs/tags/upstream/$ref^{commit}"); then
+            :
+          elif commit=$(git rev-parse --verify -q "upstream/$ref^{commit}"); then
+            :
+          elif commit=$(git rev-parse --verify -q "$ref^{commit}"); then
+            :
+          else
+            echo "::error::Unable to resolve upstream ref: $ref"
+            exit 1
+          fi
           safe_ref=$(printf '%s' "$ref" | tr -c 'A-Za-z0-9._-' '-')
           release_tag="custom-youmod-$safe_ref"
           publish=false
