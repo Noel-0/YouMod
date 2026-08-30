@@ -1,0 +1,214 @@
+name: Build custom YouMod release
+
+on:
+  schedule:
+    - cron: "23 13 * * *"
+  workflow_dispatch:
+    inputs:
+      upstream_ref:
+        description: "Upstream tag or commit; leave blank for latest tag"
+        required: false
+        type: string
+      publish:
+        description: "Publish a release for the Mac assembler"
+        required: true
+        default: false
+        type: boolean
+
+concurrency:
+  group: custom-youmod-release
+  cancel-in-progress: false
+
+permissions: {}
+
+jobs:
+  build:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+      issues: write
+    env:
+      UPSTREAM_REPOSITORY: Tonwalter888/YouMod
+      PATCH_COMMIT: 906a3e11d5ecf50ceccf86e2e3760de4bdf68419
+      FAILURE_TITLE: "[automation] Custom YouMod release requires attention"
+    steps:
+      - name: Check out automation
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4.3.1
+        with:
+          fetch-depth: 0
+
+      - name: Select upstream release
+        id: source
+        env:
+          REQUESTED_REF: ${{ inputs.upstream_ref }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          git remote add upstream "https://github.com/$UPSTREAM_REPOSITORY.git" 2>/dev/null || true
+          git fetch --force upstream main 'refs/tags/*:refs/tags/upstream/*'
+          if [[ -n "$REQUESTED_REF" ]]; then
+            ref="$REQUESTED_REF"
+          else
+            ref=$(git tag --list 'upstream/*' --sort=-version:refname | head -1)
+            ref=${ref#upstream/}
+          fi
+          test -n "$ref"
+          commit=$(git rev-parse "refs/tags/upstream/$ref^{commit}" 2>/dev/null || git rev-parse "upstream/$ref^{commit}" 2>/dev/null || git rev-parse "$ref^{commit}")
+          safe_ref=$(printf '%s' "$ref" | tr -c 'A-Za-z0-9._-' '-')
+          release_tag="custom-youmod-$safe_ref"
+          publish=false
+          [[ "$EVENT_NAME" == schedule ]] && publish=true
+          [[ "${{ inputs.publish }}" == true ]] && publish=true
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+          echo "commit=$commit" >> "$GITHUB_OUTPUT"
+          echo "release_tag=$release_tag" >> "$GITHUB_OUTPUT"
+          echo "publish=$publish" >> "$GITHUB_OUTPUT"
+
+      - name: Skip an existing scheduled release
+        id: duplicate
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.source.outputs.release_tag }}
+          PUBLISH: ${{ steps.source.outputs.publish }}
+        run: |
+          exists=false
+          if [[ "$PUBLISH" == true ]] && gh api "repos/$GITHUB_REPOSITORY/releases/tags/$RELEASE_TAG" >/dev/null 2>&1; then
+            exists=true
+          fi
+          echo "exists=$exists" >> "$GITHUB_OUTPUT"
+
+      - name: Prepare upstream source and patch
+        if: steps.duplicate.outputs.exists != 'true'
+        id: patch
+        env:
+          UPSTREAM_COMMIT: ${{ steps.source.outputs.commit }}
+        run: |
+          git config user.name github-actions
+          git config user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git worktree add --detach source "$UPSTREAM_COMMIT"
+          patch_applied=false
+          if scripts/regression-check.sh source; then
+            patch_status=already-upstream
+          else
+            git fetch origin "$PATCH_COMMIT"
+            git -C source cherry-pick "$PATCH_COMMIT"
+            scripts/regression-check.sh source
+            patch_status=cherry-picked
+            patch_applied=true
+          fi
+          echo "patch_status=$patch_status" >> "$GITHUB_OUTPUT"
+          echo "patch_applied=$patch_applied" >> "$GITHUB_OUTPUT"
+          echo "build_commit=$(git -C source rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Install build dependencies
+        if: steps.duplicate.outputs.exists != 'true'
+        run: brew install make ldid
+
+      - name: Configure Theos
+        if: steps.duplicate.outputs.exists != 'true'
+        run: |
+          echo "$(brew --prefix make)/libexec/gnubin" >> "$GITHUB_PATH"
+          echo "THEOS=$GITHUB_WORKSPACE/theos" >> "$GITHUB_ENV"
+          git clone --quiet --depth=1 --recurse-submodules https://github.com/roothide/theos.git theos
+          git clone --quiet --depth=1 -n --filter=tree:0 https://github.com/Tonwalter888/iOS-SDKs.git sdks
+          cd sdks
+          git sparse-checkout set --no-cone iPhoneOS26.5.sdk
+          git checkout --quiet
+          mv *.sdk "$GITHUB_WORKSPACE/theos/sdks"
+          git clone --quiet --depth=1 https://github.com/PoomSmart/YouTubeHeader.git "$GITHUB_WORKSPACE/theos/include/YouTubeHeader"
+          git clone --quiet --depth=1 https://github.com/PoomSmart/PSHeader.git "$GITHUB_WORKSPACE/theos/include/PSHeader"
+
+      - name: Build and validate package
+        if: steps.duplicate.outputs.exists != 'true'
+        id: package
+        run: |
+          make -C source clean package DEBUG=0 FINALPACKAGE=1
+          package=$(find source/packages -maxdepth 1 -type f -name '*iphoneos-arm.deb' -print -quit)
+          test -n "$package"
+          scripts/validate-tweak.sh "$package"
+          mkdir -p dist
+          cp "$package" dist/
+          package_name=$(basename "$package")
+          package_sha=$(shasum -a 256 "dist/$package_name" | awk '{print $1}')
+          version=$(awk '/^Version:/{print $2}' source/control)
+          echo "name=$package_name" >> "$GITHUB_OUTPUT"
+          echo "sha=$package_sha" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Write provenance
+        if: steps.duplicate.outputs.exists != 'true'
+        env:
+          UPSTREAM_REF: ${{ steps.source.outputs.ref }}
+          UPSTREAM_COMMIT: ${{ steps.source.outputs.commit }}
+          BUILD_COMMIT: ${{ steps.patch.outputs.build_commit }}
+          PATCH_STATUS: ${{ steps.patch.outputs.patch_status }}
+          PACKAGE_NAME: ${{ steps.package.outputs.name }}
+          PACKAGE_SHA: ${{ steps.package.outputs.sha }}
+          YOUMOD_VERSION: ${{ steps.package.outputs.version }}
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from datetime import datetime, timezone
+          data = {
+              "upstream_repository": os.environ["UPSTREAM_REPOSITORY"],
+              "upstream_version": os.environ["UPSTREAM_REF"],
+              "upstream_commit": os.environ["UPSTREAM_COMMIT"],
+              "patch_commit": os.environ["PATCH_COMMIT"],
+              "patch_status": os.environ["PATCH_STATUS"],
+              "build_commit": os.environ["BUILD_COMMIT"],
+              "youmod_version": os.environ["YOUMOD_VERSION"],
+              "package_name": os.environ["PACKAGE_NAME"],
+              "package_sha256": os.environ["PACKAGE_SHA"],
+              "built_at": datetime.now(timezone.utc).isoformat(),
+          }
+          with open("dist/provenance.json", "w") as f:
+              json.dump(data, f, indent=2, sort_keys=True)
+              f.write("\n")
+          PY
+
+      - name: Upload validation artifact
+        if: steps.duplicate.outputs.exists != 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: custom-youmod-${{ steps.source.outputs.ref }}
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Publish compiled tweak release
+        if: steps.duplicate.outputs.exists != 'true' && steps.source.outputs.publish == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ steps.source.outputs.release_tag }}
+          UPSTREAM_REF: ${{ steps.source.outputs.ref }}
+        run: |
+          gh release create "$RELEASE_TAG" dist/* \
+            --title "Custom YouMod for $UPSTREAM_REF" \
+            --notes "Compiled YouMod package only. No YouTube IPA or signing credentials are included."
+
+      - name: Close resolved automation issue
+        if: success() && steps.duplicate.outputs.exists != 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue list --state open --search "$FAILURE_TITLE in:title" --json number --jq '.[].number' |
+          while read -r issue; do
+            [[ -n "$issue" ]] && gh issue close "$issue" --comment "Resolved by run $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID."
+          done
+
+      - name: Open or update automation failure issue
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM_REF: ${{ steps.source.outputs.ref }}
+        run: |
+          body="Upstream ref: \`$UPSTREAM_REF\`
+          Patch commit: \`$PATCH_COMMIT\`
+          Failed run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID
+
+          No release was published. Manual review is required."
+          issue=$(gh issue list --state open --search "$FAILURE_TITLE in:title" --json number --jq '.[0].number // empty')
+          if [[ -n "$issue" ]]; then
+            gh issue comment "$issue" --body "$body"
+          else
+            gh issue create --title "$FAILURE_TITLE" --body "$body"
+          fi

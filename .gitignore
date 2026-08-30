@@ -1,0 +1,14 @@
+# Never allow decrypted or assembled applications into this repository.
+*.ipa
+*.tipa
+
+# Local signing material and credentials are out of scope for this repository.
+*.p12
+*.mobileprovision
+*.cer
+*.key
+.env
+
+# Local build output.
+dist/
+packages/
